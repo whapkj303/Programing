@@ -1,0 +1,102 @@
+//윈도우 함수
+
+select ename as "이름" from emp a where a.empno=101;
+
+SELECT * FROM emp where empno = 101 and sal >=2000 ; 
+
+select * from emp where ename like '을지문덕%' ; 
+// ~% 는 ~로 시작하는 값 검색
+
+select * from emp where ename like '%덕' ;
+// %~ 는 ~로 끝나는 값 검색
+
+select * from emp where ename like '%을지문_' ;
+// Like문에 을지문으로 시작하고 하나의 데이터만 더 있는 것을 조회
+
+select * from emp;
+select * from dept;
+
+insert into emp values (1001, 'test1' , 1000 , '1001' , sysdate);
+insert into emp values (1002, 'test2' , 2000 , '1001' , sysdate);
+insert into emp values (1003, 'test3' , 3000 , '1001' , sysdate);
+insert into emp values (1004, 'test4' , 4000 , '1001' , sysdate);
+insert into emp values (1005, 'test5' , 5000 , '1001' , sysdate);
+insert into emp values (1006, 'test6' , 6000 , '1001' , sysdate);
+
+select * from emp where sal between 1000 and 2000;
+// sal 이 1000와 2000사이 조회
+
+select * from emp where sal not between 1000 and 2000;
+// sal 이 1000와 2000사이가 아닌것 조회
+
+alter table emp add (job varchar2(20) );
+// job table 추가
+
+alter table emp add (MGR varchar2(20) );
+
+update  emp set job='manager' ;
+// 데이터 수정 update 테이블명 set 컬럼명='수정값' where 컬럼명='수정값';
+
+update  emp set job='clerk' where empno='1005'  ;
+
+select * from emp where job in ('clerk', 'manager');
+
+select * from emp where (job,ename) in (('clerk','test'),('manager','test6'));
+// in은 or의 의미를 가진다. 위는 두개의 칼럼을 지정한것
+
+
+select * from emp where mgr is null;
+
+//group by는 테이블에서 소규모행을 그룹화하여 합계, 평균, 최대값, 최소값 등을 계산
+select deptno,sum(sal) from emp group by deptno; 
+
+// group by 조건절을 사용하려면 where 절 대신 having을 사용해야한다. 
+select deptno,sum(sal) from emp group by deptno having sum(sAL) >10000;
+
+//count() 함수는 행 수를 계산. count(*)은 null 값 포함, count(칼럼)은 null 값 제외
+
+// ** mgr 타입 변환 -> modify 사용 **
+alter table emp modify (mgr number(10) default 1);
+update  emp set mgr='500' ;
+
+// group by 사용 예제
+select deptno, mgr, avg(sal) from emp group by deptno, mgr;
+
+select job,sum(sal) from emp group by job having sum(sal) > 500;
+// 직업 그룹별 합계중 급여가 500 이상인 직업 조회
+
+select deptno,sum(sal) from emp where empno between 1000 and 1003 group by deptno;
+// 사원별 조회 조건은 where 절에 넣어야 한다.
+
+// select문 실행 순서
+// FROM, WHERE, GROUP BY, HAVING , SELECT , ORDER BY 순으로 실행
+
+// 내장형 함수 -> 형변환(TO_NUMBER(문자열)-> 문자를 숫자로, TO_CHAR(숫자 혹은 날짜)->  숫자 혹은 문자를 FORMART의 문자로 변환, TO_DATE(문자열)-> 문자열을 지정된 FORMART의 날짜형으로 변환), 문자열 및 숫자열 함수, 날짜형 함수
+// DUAL 테이블 : 오라클에 자동으로 생성되는 테이블, 사용자가 임시로 사용할 수 있는 테이블로 내장형 함수를 살행, 모든 사용자가 사용
+
+SELECT ASCII('a'), SUBSTR('ABC', 1,2), LENGTH('A BC'), LTRIM(' ABC'), LENGTH(LTRIM(' ABC')) FROM DUAL;
+
+// DECODE 문으로 IF문 구현
+DECODE(EMPNO,1000,'TRUE','FALSE')
+// 비교해서 트루 폴스 값 출력
+
+// CASE
+SELECT CASE
+WHENE EMPNO= 1000 THEN 'A'
+ELSE 'C'
+END
+FROM EMP;
+
+// ROWNUM : 조회되는 행 수를 제한할 때 많이 사용
+SELECT * FROM EMP WHERE ROWNUM <= 3;
+
+
+
+
+
+
+
+
+
+
+
