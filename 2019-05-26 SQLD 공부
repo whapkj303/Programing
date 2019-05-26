@@ -1,0 +1,167 @@
+select decode(empno, 1001, 'True','False') from emp;
+
+select case when empno = 1000 then 'A' when empno = 1001 then 'B' else 'C' end from emp;
+
+select * from (select rownum list, ename from emp) where list <= 5 ;
+// 5개 행까지 ename이 됨
+
+select * from (select rownum list, ename from emp) where list between 5 and 10 ;
+// 5부터 10사이
+
+select rowid, empno from emp;
+
+// 임시 테이블
+with mgr as(select * form emp union all select * from emp) select * from mgr where empno=1000;
+
+// DCL (Data Control Language)
+grant 권한 on 테이블명 to user;
+// 권한 peferences : 제약조건 생성, alter : 테이블 수정 , index : 인덱스 생성 , all : 테이블 권한
+
+// with grant option -> 특정 사용자에게 권한 부여, revoke 하면 모든 권한이 회수
+// with admin option -> 테이블에 대한 모든 권한 부여, 특정 사용자 권한만 취소된다.
+
+// revoke문은 데이터사용자에게 부여된 권한 회수
+// revoke privileges on object from user;
+
+set autocommit on; 
+// 자동 커밋
+
+// rollback은 데이터에 대한 변경 사용 모두 취소하고 트랜잭션을 종료
+
+// savepoint(저장점)을 사용하면 지정된 위치까지만 롤백할 수 있다.
+// rollback to <savepoint> 
+// rollback 실행시 변경된 모든 데이터를 취소한다.
+
+//coalesce함수는 null이 아닌 인자값을 반환
+// round는 반올림 후 반환
+
+// 외래키 추가하는 sql문
+alter table emp add constraint fk_dept forgin_key (deptno) references dept(deptno);
+
+// max(a)->Limt , max(b)->기술사 출력
+select max(a), max(b) from (select 'Limt' A, '' B from dual union all select '' A, '기술사' B from dual);
+// dual은 임시 테이블 생성 쿼리 union all은 여러개의 테이블을 합치는 것, 중복되는 값도 반환한다.
+
+// 2. 이제부턴 sql 활용
+
+select * from emp, dept where emp.deptno = dept.deptno;
+
+select * from emp, dept where emp.deptno = dept.deptno and emp.ename like 'te%' order by ename;
+
+// inner join 문은 on을 이용해서 조건을 넣음
+select * from emp inner join dept on emp.deptno = dept.deptno;
+
+//intersect은 교집합 조회
+select deptno from emp intersect  select deptno from dept;
+
+select * from emp;
+
+//outer join -> 테이블간의 조인하는 경우, 한쪽 테이블에만 있는 데이터도 추가
+select * from emp, dept where emp.deptno (+)= dept.deptno;
+
+// LEFT OUTER JOIN 과 RIGHT OUTER JOIN 두개의 테이블에서 왼쪽 혹은 오른쪽에만 있는 것을 포함
+select * from dept LEFT OUTER JOIN emp on emp.deptno = dept.deptno;
+
+// cross join : 조인 조건 구 없이 2개의 테이블을 하나로 조인 -> 조인구가 없기 때문에 카타시안 곱 발생 14 * 4 =56개의 행이 조회됨
+
+// union 합집합!! : 두개의 칼럼수, 데이터 형식이 맞지 않으면 오류가 발생한다. 중복된 데이터 제거
+
+// 차집합을 만드는 minus : 중복되지 않는 데이터 
+select deptno from emp minus select deptno from dept;
+
+drop table emp;
+
+create table emp(
+    empno number(10) primary key,
+    ename varchar(20),
+    detpno number(10),
+    mgr number(10),
+    job varchar(20),
+    sal number(10)
+);
+
+insert into emp values (1000, 'test1', 20, null, 'clerk', 800);
+insert into emp values (1001, 'test2', 30, 1000, 'salesman', 1600);
+insert into emp values (1002, 'test3', 20, 1000, 'salesman', 1250);
+insert into emp values (1003, 'test4', 20, 1000, 'manager', 2975);
+insert into emp values (1004, 'test5', 30, 1000, 'salesman', 1250);
+insert into emp values (1005, 'test6', 30, 1001, '1001', 2850);
+insert into emp values (1006, 'test7', 10, 1001, '1001', 2450);
+insert into emp values (1007, 'test8', 20, 1006, 'president', 5000);
+insert into emp values (1008, 'test9', 10, 1000, 'analyst', 3000);
+
+select max(LEVEL) from limbest.emp start with mgr is null connect by prior empno = mgr;
+
+select * from emp;
+
+select LEVEL, empno, mgr, ename from limbest.emp start with mgr is null connect by prior empno = mgr;
+
+select * from emp where DEPTNO = (select DEPTNO from DEPT where DEPTNO=10);
+
+// 메인쿼리(서브쿼리)
+select * from (select rownum num,ename from emp) a where num <5;
+
+// 단일행 서브쿼리 , 다중행 서브쿼리 
+// 다중행
+// in(or 조건.하나만 동일하면 참), all(메인 서브 모두 동일시 참), any(하나이상 동일하면 참), exists(하나라도 존재하면 참)
+
+select ename ,dname, sal from emp,dept where emp.deptno=dept.deptno and emp.empno in (select empno from emp where sal > 2000);
+
+select * from emp where deptno <= all (20, 30);
+
+// 칼럼명 변경 : rename column 칼럼명 to 변경할 칼럼이름
+alter table emp rename column detpno to deptno;
+
+// 스칼라 : 반드시 한개의 행과 한개의 칼럼만 반환
+select ename as "이름" sal as "급여" (select avg(sal) from emp) as "평균급여" from emp where empno=1001;
+
+// 연관 서브쿼리
+from emp a where a.deptno = (select deptno from dept b where b.deptno = a.deptno);
+
+select decode (deptno, null , '전체합계' , deptno), sum(sal) from emp group by rollup(deptno);
+
+select deptno, job, sum(sal) from emp group by rollup (deptno, job);
+
+select deptno,grouping(deptno), job,grouping(job), sum(sal) from emp  group by rollup(deptno, job);
+
+select deptno decode(grouping(deptno), 1, '전체합계') tot, job, decode(grouping(job),1,'부서합계') t_dept, sum(sal) from emp group by rollup (deptno, job);
+
+// 직업별, 부서별 합계 조회
+select deptno,job,sum(sal) from emp group by grouping sets(deptno, job);
+
+select ename, sal, rank() over (order by sal desc) all_rank, rank() over (partition by job order by sal desc) job_rank from emp;
+
+// 동일한 순위에 고유한 순위를 부여
+select ename, sal, rank() over (order by sal desc) all_rank, row_number() over (order by sal desc) row_num from emp;
+
+// 같은 관리자에 급여 합계
+select ename, sal, sum(sal) over (partition by mgr) sum_mgr from emp;
+
+// 행 순서관련 윈도우 함수
+// FIRST_VALUE : 가장 처음에 나오는 값, LAST_VALUE : 가장 나중에 나오는 값, LAG : 이전행, LEAD : 특정 위치의 행을 가지고 온다.
+
+//first_value 사용
+select deptno, ename, sal, first_value(ename) over (partition by deptno order by sal desc rows unbounded preceding) as dept_A from emp;
+
+//lag 함수 : 이전의 값을 가져온다.
+select deptno, ename, sal, lag(sal) over(order by sal desc) as pre_sal from emp;
+
+// 지정된 위치의 행을 가져온다. 
+select deptno, ename, sal, lead(sal,2) over(order by sal desc) as pre_sal from emp;
+
+//percent_rank 사용. 제일 먼저 0, 제일 늦게 1-> 순서별 백분율 조회 
+select deptno, ename, sal, percent_rank() over(partition by deptno order by sal desc) as percent_sal from emp;
+
+//ntile(4)
+select deptno, ename, sal, ntile(4) over (order by sal desc) as n_title from emp;
+
+// patition 기능 여러개의 데이터 파일을 분리해서 저장
+// rang partition 값의 범위를 기준으로 나뉨
+// list partition 특정 값을 기준으로 분할
+// hash partition 알아서 분할하고 관리
+// 파티션 인덱스 
+// 파티션 키를 사용해서 인덱스를 만드는 Prefixed Index와 해당 파티션만 사용하는 Local Index 등으로 나뉜다.
+
+
+
+
